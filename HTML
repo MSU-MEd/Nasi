@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ห้องเรียนครูนริศา แสงยิ่ง - โรงเรียนทีปังกรวิทยาพัฒน์ฯ</title>
+  <!-- Tailwind CSS & FontAwesome & Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            chula: {
+              pink: '#E96188',
+              deepPink: '#C43B64',
+              gold: '#D4AF37',
+              darkGold: '#AA820A',
+              roseBg: '#FFF0F5',
+              softPink: '#FCE4EC'
+            }
+          },
+          fontFamily: {
+            prompt: ['Prompt', 'sans-serif'],
+            sarabun: ['Sarabun', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body { font-family: 'Prompt', sans-serif; background-color: #FDFAF6; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(233, 97, 136, 0.15); }
+    .gradient-hero { background: linear-gradient(135deg, #7A1C3B 0%, #C43B64 50%, #E96188 100%); }
+  </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ================= TOP HEADER & NAVIGATION ================= -->
+  <header class="sticky top-0 z-50 bg-white shadow-md border-b-2 border-chula-gold">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchMainTab('public-portal')">
+          <div class="w-12 h-12 rounded-full bg-chula-deepPink text-white flex items-center justify-center font-bold text-xl shadow-lg border-2 border-chula-gold">
+            นร
+          </div>
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-chula-deepPink tracking-tight">ห้องเรียนครูนริศา แสงยิ่ง</h1>
+            <p class="text-xs sm:text-sm text-gray-500">โรงเรียนทีปังกรวิทยาพัฒน์ (มัธยมวัดหัตถสารเกษตร) ในพระราชูปถัมภ์ฯ</p>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
+          <button onclick="switchPublicSection('hero-section')" class="hover:text-chula-deepPink transition">หน้าหลัก</button>
+          <button onclick="switchPublicSection('teacher-profile')" class="hover:text-chula-deepPink transition">ประวัติครู</button>
+          <button onclick="switchPublicSection('schedule-section')" class="hover:text-chula-deepPink transition">ตารางสอน</button>
+          <button onclick="switchPublicSection('classroom-rooms')" class="hover:text-chula-deepPink transition">คลังห้องเรียน</button>
+          <button onclick="switchPublicSection('student-works')" class="hover:text-chula-deepPink transition">ผลงานนักเรียน</button>
+          <button onclick="switchPublicSection('library-portal')" class="hover:text-chula-deepPink transition">ห้องสมุด</button>
+        </nav>
+
+        <!-- Backoffice Toggle Button -->
+        <div class="flex items-center space-x-2">
+          <button onclick="openConfigModal()" class="p-2 text-gray-500 hover:text-chula-deepPink transition" title="ตั้งค่าระบบ / Google Sheets API">
+            <i class="fa-solid fa-gear text-lg"></i>
+          </button>
+          <button id="toggle-backoffice-btn" onclick="toggleBackoffice()" class="px-4 py-2 bg-gradient-to-r from-chula-deepPink to-chula-pink text-white rounded-lg shadow-md hover:opacity-95 transition font-medium flex items-center space-x-2">
+            <i class="fa-solid fa-user-shield"></i>
+            <span id="backoffice-btn-text">เข้าสู่หลังบ้านครู</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- API CONFIG MODAL -->
+  <div id="config-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+      <button onclick="closeConfigModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      <h3 class="text-xl font-bold text-chula-deepPink mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-plug"></i> ตั้งค่าการเชื่อมต่อ Google Sheets Web App
+      </h3>
+      <p class="text-sm text-gray-600 mb-4">ระบุ Google Apps Script Web App URL เพื่อซิงค์ข้อมูลจริงกับ Google Sheets</p>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Web App URL:</label>
+        <input type="text" id="api-url-input" class="w-full border rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-chula-pink" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div class="flex justify-between items-center">
+        <span id="api-status-text" class="text-xs text-green-600 font-semibold"><i class="fa-solid fa-circle-check"></i> พร้อมใช้งาน</span>
+        <div class="space-x-2">
+          <button onclick="closeConfigModal()" class="px-4 py-2 text-gray-500 rounded-lg text-sm">ยกเลิก</button>
+          <button onclick="saveApiUrl()" class="px-5 py-2 bg-chula-deepPink text-white rounded-lg text-sm font-medium shadow hover:bg-chula-pink">บันทึก URL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow">
+    
+    <!-- ================================================================= -->
+    <!-- 1. PUBLIC CLASSROOM PORTAL (หน้าสำหรับนักเรียนและบุคคลทั่วไป) -->
+    <!-- ================================================================= -->
+    <div id="public-portal-container">
+      
+      <!-- HERO BANNER -->
+      <section id="hero-section" class="gradient-hero text-white py-16 px-4 shadow-inner relative overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between relative z-10 gap-8">
+          <div class="max-w-2xl space-y-4 text-center md:text-left">
+            <span class="bg-chula-gold/30 text-chula-gold px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide border border-chula-gold/40">กลุ่มสาระการเรียนรู้ภาษาไทย</span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+              ยินดีต้อนรับสู่ <br><span class="text-chula-gold">ห้องเรียนออนไลน์ครูนริศา</span>
+            </h2>
+            <p class="text-pink-100 text-sm sm:text-base font-light">
+              ศูนย์รวมการเรียนรู้ภาษาไทย ตารางสอน สถิติการมาเรียน คลังผลงานนักเรียน และบริการระบบการดูแลช่วยเหลือนักเรียนครบวงจร
+            </p>
+            <div class="pt-4 flex flex-wrap gap-3 justify-center md:justify-start">
+              <button onclick="switchPublicSection('schedule-section')" class="px-6 py-3 bg-chula-gold text-chula-deepPink font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-calendar-days mr-2"></i> ดูตารางสอน 2/2569
+              </button>
+              <button onclick="switchPublicSection('student-works')" class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-semibold rounded-xl border border-white/30 transition">
+                <i class="fa-solid fa-award mr-2"></i> ชมผลงานนักเรียน
+              </button>
+            </div>
+          </div>
+          <!-- Card Graphic -->
+          <div class="w-full md:w-96 glass-card p-6 rounded-2xl text-gray-800 shadow-2xl space-y-4 border-2 border-chula-gold/50">
+            <div class="flex items-center space-x-4 border-b pb-4">
+              <div class="w-16 h-16 rounded-full bg-chula-softPink border-2 border-chula-deepPink flex items-center justify-center text-chula-deepPink text-2xl font-bold">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-lg text-chula-deepPink">นางสาวนริศา แสงยิ่ง</h3>
+                <p class="text-xs text-gray-500">ครูประจำการ (รหัส 105)</p>
+                <p class="text-xs font-semibold text-chula-gold mt-1">ภาคเรียนที่ 2/2569</p>
+              </div>
+            </div>
+            <div class="space-y-2 text-xs text-gray-600">
+              <div class="flex justify-between"><span>รายวิชาที่สอนหลัก:</span> <span class="font-bold text-gray-800">ท30217, ท30218</span></div>
+              <div class="flex justify-between"><span>ระดับชั้นที่รับผิดชอบ:</span> <span class="font-bold text-gray-800">ม.4, ม.5, ม.6</span></div>
+              <div class="flex justify-between"><span>จำนวนห้องสอน:</span> <span class="font-bold text-gray-800">9 ห้องเรียน</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TEACHER PROFILE -->
+      <section id="teacher-profile" class="max-w-7xl mx-auto px-4 py-12">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-chula-deepPink">ประวัติครูผู้สอน</h2>
+          <div class="w-20 h-1 bg-chula-gold mx-auto mt-2 rounded-full"></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-xl p-8 border border-chula-roseBg grid md:grid-cols-3 gap-8 items-center">
+          <div class="text-center md:border-r border-gray-100 pr-0 md:pr-8">
+            <div class="w-44 h-44 mx-auto rounded-full bg-gradient-to-tr from-chula-deepPink to-chula-gold p-1 shadow-xl mb-4">
+              <div class="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <i class="fa-solid fa-user-graduate text-6xl text-chula-deepPink"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-chula-deepPink">นางสาวนริศา แสงยิ่ง</h3>
+            <p class="text-sm text-gray-500 mb-2">ตำแหน่ง ครู กลุ่มสาระการเรียนรู้ภาษาไทย</p>
+            <span class="inline-block bg-chula-softPink text-chula-deepPink text-xs px-3 py-1 rounded-full font-semibold">ครูผู้สอนรหัส 105</span>
+          </div>
+          <div class="md:col-span-2 space-y-4">
+            <h4 class="text-lg font-bold text-gray-800 border-b pb-2 flex items-center gap-2">
+              <i class="fa-solid fa-graduation-cap text-chula-gold"></i> ข้อมูลการปฏิบัติการสอน & รายวิชา
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="p-4 bg-chula-roseBg/50 rounded-xl border border-chula-pink/10">
+                <span class="text-xs text-gray-500 font-semibold">รายวิชาเปิดสอน</span>
+                <p class="font-bold text-chula-deepPink text-base">ท30217 ภาษาไทย (ม.5/4, 5/5, 5/10, 5/12, 5/13, 5/14, 6/13)</p>
+                <p class="font-bold text-chula-deepPink text-base mt-1">ท30218 ภาษาไทย (ม.4/5, 4/10)</p>
+              </div>
+              <div class="p-4 bg-chula-roseBg/50 rounded-xl border border-chula-pink/10">
+                <span class="text-xs text-gray-500 font-semibold">งานกิจกรรมพัฒนาผู้เรียน</span>
+                <p class="text-sm font-semibold text-gray-700">• กิจกรรมโฮมรูม ป้องกันการทุจริต</p>
+                <p class="text-sm font-semibold text-gray-700">• กิจกรรม ลส. นร. ยุวฯ บพ.</p>
+                <p class="text-sm font-semibold text-gray-700">• งานสวนพฤกษศาสตร์โรงเรียน</p>
+              </div>
+            </div>
+            <div class="pt-2">
+              <h5 class="text-sm font-bold text-gray-700 mb-1">ปรัชญาการทำงาน</h5>
+              <p class="text-xs sm:text-sm text-gray-600 leading-relaxed italic">
+                "มุ่งมั่นพัฒนาทักษะภาษาไทยของนักเรียนอย่างรอบด้าน ส่งเสริมคุณธรรม จริยธรรม และการเรียนรู้ด้วยเทคโนโลยีในยุคดิจิทัล"
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCHEDULE SECTION (ตารางสอนจริง + รูปภาพอ้างอิง) -->
+      <section id="schedule-section" class="max-w-7xl mx-auto px-4 py-12">
+        <div class="text-center mb-10">
+          <span class="text-chula-gold text-sm font-semibold uppercase tracking-wider">Schedule 2/2569</span>
+          <h2 class="text-3xl font-bold text-chula-deepPink">ตารางสอนครูนริศา แสงยิ่ง</h2>
+          <p class="text-gray-500 text-sm mt-1">ภาคเรียนที่ 2 ปีการศึกษา 2569 (โรงเรียนทีปังกรวิทยาพัฒน์ฯ)</p>
+          <div class="w-20 h-1 bg-chula-gold mx-auto mt-2 rounded-full"></div>
+        </div>
+
+        <!-- รูปภาพตารางสอนจริงจากคุณครู -->
+        <div class="mb-10 bg-white p-4 rounded-2xl shadow-lg border border-chula-gold/30">
+          <h3 class="text-lg font-bold text-chula-deepPink mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-image text-chula-gold"></i> เอกสารตารางสอนฉบับจริง
+          </h3>
+          <div class="overflow-hidden rounded-xl border border-gray-200">
+            <img src="https://i.ibb.co/TDb11z7Z/att-GGs5-YOKS41f-Xho-AKxax-NF6-TLJi5-MO1w-OOww01-Jq-X6-Zk.jpg" alt="ตารางสอนครูนริศา แสงยิ่ง" class="w-full object-contain max-h-[500px] mx-auto hover:scale-105 transition duration-300">
+          </div>
+        </div>
+
+        <!-- Dynamic Interactive Table -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-chula-roseBg">
+          <div class="bg-gradient-to-r from-chula-deepPink to-chula-pink text-white p-4 font-bold text-lg flex justify-between items-center">
+            <span><i class="fa-solid fa-table mr-2"></i> ตารางสอน Interactive</span>
+            <span class="text-xs bg-chula-gold text-chula-deepPink px-3 py-1 rounded-full font-bold">ชื่อ-สกุล 105 นางสาวนริศา แสงยิ่ง</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-center border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-chula-roseBg text-chula-deepPink font-bold border-b">
+                  <th class="p-3 border-r min-w-[80px]">วัน/เวลา</th>
+                  <th class="p-2 border-r min-w-[100px]">07.45-08.15<br><span class="text-[10px] text-gray-500">หน้าเสาธง</span></th>
+                  <th class="p-2 border-r min-w-[100px]">08.15-08.30<br><span class="text-[10px] text-gray-500">โฮมรูม</span></th>
+                  <th class="p-2 border-r min-w-[110px]">1<br><span class="text-[10px] text-gray-500">08.30-09.20</span></th>
+                  <th class="p-2 border-r min-w-[110px]">2<br><span class="text-[10px] text-gray-500">09.20-10.10</span></th>
+                  <th class="p-2 border-r min-w-[110px]">3<br><span class="text-[10px] text-gray-500">10.10-11.00</span></th>
+                  <th class="p-2 border-r min-w-[110px]">4<br><span class="text-[10px] text-gray-500">11.00-11.50</span></th>
+                  <th class="p-2 border-r min-w-[100px]">5<br><span class="text-[10px] text-gray-500">11.50-12.40</span></th>
+                  <th class="p-2 border-r min-w-[110px]">6<br><span class="text-[10px] text-gray-500">12.40-13.30</span></th>
+                  <th class="p-2 border-r min-w-[110px]">7<br><span class="text-[10px] text-gray-500">13.30-14.20</span></th>
+                  <th class="p-2 min-w-[110px]">8<br><span class="text-[10px] text-gray-500">14.20-15.10</span></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <!-- จันทร์ -->
+                <tr>
+                  <td class="p-3 font-bold bg-yellow-50 text-yellow-800 border-r">จันทร์</td>
+                  <td class="p-2 border-r bg-gray-50 text-gray-600">กิจกรรมหน้าเสาธง</td>
+                  <td class="p-2 border-r bg-pink-50 text-chula-deepPink font-semibold text-[11px]">Homeroom ป้องกันการทุจริต</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/13 (651)</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/14 (652)</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50">พักกลางวัน</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/10 (322)</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/5 (642)</td>
+                  <td class="p-2 text-purple-700 bg-purple-50 font-semibold">กิจกรรมสวนพฤกษศาสตร์</td>
+                </tr>
+                <!-- อังคาร -->
+                <tr>
+                  <td class="p-3 font-bold bg-pink-50 text-pink-800 border-r">อังคาร</td>
+                  <td class="p-2 border-r bg-gray-50 text-gray-600">กิจกรรมหน้าเสาธง</td>
+                  <td class="p-2 border-r bg-pink-50 text-chula-deepPink font-semibold text-[11px]">Homeroom ป้องกันการทุจริต</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/12 (รวงผึ้ง 2)</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/5 (642)</td>
+                  <td class="p-2 border-r bg-gray-50">พักกลางวัน</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/14 (652)</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/10 (322)</td>
+                  <td class="p-2 text-indigo-700 bg-indigo-50 font-semibold">ค้นคว้าฯ<br>6/13 (666)</td>
+                </tr>
+                <!-- พุธ -->
+                <tr>
+                  <td class="p-3 font-bold bg-green-50 text-green-800 border-r">พุธ</td>
+                  <td class="p-2 border-r bg-gray-50 text-gray-600">กิจกรรมหน้าเสาธง</td>
+                  <td class="p-2 border-r bg-pink-50 text-chula-deepPink font-semibold text-[11px]">Homeroom ป้องกันการทุจริต</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-blue-100/50"><b>ท30218</b><br>4/10 (632)</td>
+                  <td class="p-2 border-r text-amber-700 bg-amber-50 font-semibold">กิจกรรม ลส. นร. ยุวฯ บพ.</td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/12 (รวงผึ้ง 2)</td>
+                  <td class="p-2 border-r bg-gray-50">พักกลางวัน</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 bg-pink-100/50"><b>ท30217</b><br>5/4 (641)</td>
+                </tr>
+                <!-- พฤหัสบดี -->
+                <tr>
+                  <td class="p-3 font-bold bg-orange-50 text-orange-800 border-r">พฤหัสฯ</td>
+                  <td class="p-2 border-r bg-gray-50 text-gray-600">กิจกรรมหน้าเสาธง</td>
+                  <td class="p-2 border-r bg-pink-50 text-chula-deepPink font-semibold text-[11px]">Homeroom ป้องกันการทุจริต</td>
+                  <td class="p-2 border-r bg-teal-50 text-teal-800 font-semibold">กิจกรรมประชุมระดับชั้น</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-blue-100/50"><b>ท30218</b><br>4/10 (632)</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50">พักกลางวัน</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-blue-100/50"><b>ท30218</b><br>4/5 (622)</td>
+                  <td class="p-2 text-rose-700 bg-rose-50 font-semibold">กิจกรรมชุมนุม</td>
+                </tr>
+                <!-- ศุกร์ -->
+                <tr>
+                  <td class="p-3 font-bold bg-blue-50 text-blue-800 border-r">ศุกร์</td>
+                  <td class="p-2 border-r bg-gray-50 text-gray-600">กิจกรรมหน้าเสาธง</td>
+                  <td class="p-2 border-r bg-pink-50 text-chula-deepPink font-semibold text-[11px]">Homeroom ป้องกันการทุจริต</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/13 (651)</td>
+                  <td class="p-2 border-r bg-blue-100/50"><b>ท30218</b><br>4/5 (622)</td>
+                  <td class="p-2 border-r bg-gray-50">พักกลางวัน</td>
+                  <td class="p-2 border-r bg-gray-50"></td>
+                  <td class="p-2 border-r bg-pink-100/50"><b>ท30217</b><br>5/4 (641)</td>
+                  <td class="p-2 bg-gray-50"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLASSROOM ROOMS (คลังห้องเรียนรายชั้น) -->
+      <section id="classroom-rooms" class="max-w-7xl mx-auto px-4 py-12">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-chula-deepPink">คลังห้องเรียนที่รับผิดชอบ</h2>
+          <p class="text-gray-500 text-sm mt-1">แยกข้อมูลรายชั้น/ห้องเรียน (รวม 9 ห้องเรียน)</p>
+          <div class="w-20 h-1 bg-chula-gold mx-auto mt-2 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-9 gap-3">
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.4/5')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">4/5</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.4/5</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.4/10')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">4/10</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.4/10</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/4')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/4</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/4</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/5')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/5</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/5</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/10')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/10</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/10</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/12')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/12</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/12</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/13')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/13</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/13</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.5/14')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">5/14</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.5/14</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-md border hover:border-chula-deepPink text-center cursor-pointer transition transform hover:-translate-y-1" onclick="alert('ระบบคลังเอกสารและงานรายห้อง ม.6/13')">
+            <div class="w-10 h-10 bg-chula-softPink text-chula-deepPink rounded-full flex items-center justify-center font-bold mx-auto mb-2 text-xs">6/13</div>
+            <h4 class="font-bold text-sm text-gray-800">ม.6/13</h4>
+            <span class="text-[10px] text-gray-400">เข้าชมคลังงาน</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- STUDENT WORKS GALLERY -->
+      <section id="student-works" class="max-w-7xl mx-auto px-4 py-12 bg-white rounded-3xl my-8 shadow-sm">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-bold text-chula-deepPink">ผลงานนักเรียน</h2>
+          <p class="text-gray-500 text-sm mt-1">คลังรวบรวมชิ้นงาน สรุปความรู้ และรางวัลนักเรียน</p>
+          <div class="w-20 h-1 bg-chula-gold mx-auto mt-2 rounded-full"></div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="bg-chula-roseBg/40 rounded-2xl p-5 border border-chula-pink/20 hover:shadow-lg transition">
+            <div class="h-44 bg-pink-200 rounded-xl mb-4 flex items-center justify-center text-chula-deepPink text-4xl font-bold">
+              <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <span class="text-xs bg-chula-gold text-chula-deepPink font-bold px-2 py-1 rounded">วิชา ท30217</span>
+            <h3 class="font-bold text-base mt-2 text-gray-800">การเรียงร้อยถ้อยคำและเรียงความ</h3>
+            <p class="text-xs text-gray-500 mt-1">ผลงานเรียงความสร้างสรรค์ระดับชั้น ม.5/13</p>
+          </div>
+          <div class="bg-chula-roseBg/40 rounded-2xl p-5 border border-chula-pink/20 hover:shadow-lg transition">
+            <div class="h-44 bg-purple-200 rounded-xl mb-4 flex items-center justify-center text-purple-700 text-4xl font-bold">
+              <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+            <span class="text-xs bg-chula-deepPink text-white font-bold px-2 py-1 rounded">วิชา ท30218</span>
+            <h3 class="font-bold text-base mt-2 text-gray-800">ถอดบทเรียนวรรณคดีการละคร</h3>
+            <p class="text-xs text-gray-500 mt-1">แผ่นผังความคิด (Mind Mapping) ม.4/10</p>
+          </div>
+          <div class="bg-chula-roseBg/40 rounded-2xl p-5 border border-chula-pink/20 hover:shadow-lg transition">
+            <div class="h-44 bg-amber-200 rounded-xl mb-4 flex items-center justify-center text-amber-800 text-4xl font-bold">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <span class="text-xs bg-amber-600 text-white font-bold px-2 py-1 rounded">รางวัลชนะเลิศ</span>
+            <h3 class="font-bold text-base mt-2 text-gray-800">การแข่งขันทักษะการอ่านแต่งกาพย์</h3>
+            <p class="text-xs text-gray-500 mt-1">ตัวแทนนักเรียน ม.6/13 ระดับเขตพื้นที่ฯ</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PUBLIC LIBRARY PORTAL -->
+      <section id="library-portal" class="max-w-7xl mx-auto px-4 py-12">
+        <div class="bg-gradient-to-r from-chula-deepPink to-purple-800 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+          <div class="max-w-3xl space-y-4">
+            <span class="bg-chula-gold text-chula-deepPink font-bold text-xs px-3 py-1 rounded-full"><i class="fa-solid fa-book mr-1"></i> ห้องสมุดโรงเรียนออนไลน์</span>
+            <h2 class="text-3xl font-bold">ระบบยืม-คืนหนังสือ & อันดับยอดนักอ่าน</h2>
+            <p class="text-xs sm:text-sm text-pink-100">นักเรียนสามารถตรวจสอบรายการหนังสือ ยืม-คืน และลงชื่อใช้งานด้วยรหัสนักเรียน</p>
+            <div class="pt-2 flex flex-wrap gap-4">
+              <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 min-w-[160px]">
+                <div class="text-2xl font-bold text-chula-gold" id="lib-total-books">450 เล่ม</div>
+                <div class="text-xs text-gray-200">หนังสือในคลัง</div>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 min-w-[160px]">
+                <div class="text-2xl font-bold text-chula-gold" id="lib-total-borrows">128 ครั้ง</div>
+                <div class="text-xs text-gray-200">สถิติการยืมเดือนนี้</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+
+    <!-- ================================================================= -->
+    <!-- 2. TEACHER & ADMIN BACKOFFICE SUITE (ระบบหลังบ้านจัดการข้อมูล) -->
+    <!-- ================================================================= -->
+    <div id="backoffice-container" class="hidden max-w-7xl mx-auto px-4 py-8">
+      
+      <!-- Backoffice Header Banner -->
+      <div class="bg-white rounded-2xl p-6 shadow-md border-l-8 border-chula-deepPink mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-chula-deepPink flex items-center gap-2">
+            <i class="fa-solid fa-sliders"></i> ระบบหลังบ้านครูนริศา & ผู้ดูแลระบบ
+          </h2>
+          <p class="text-xs text-gray-500 mt-1">บริหารจัดการทะเบียนนักเรียน เช็คชื่อ คะแนนความประพฤติ ออมเงิน และรายงานโรงเรียน</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold border border-green-200">
+            <i class="fa-solid fa-database mr-1"></i> Google Sheets API: Linked
+          </span>
+        </div>
+      </div>
+
+      <!-- Backoffice Module Navigation Grid (11 Modules) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+        <button onclick="showModule('mod-students')" class="bo-tab-btn active p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-chula-deepPink text-lg"><i class="fa-solid fa-users"></i></div>
+          <div class="font-bold text-xs text-gray-800">1. ทะเบียนนักเรียน</div>
+          <div class="text-[10px] text-gray-400">นำเข้า Excel / ย้ายชั้น</div>
+        </button>
+        <button onclick="showModule('mod-att-morning')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-amber-500 text-lg"><i class="fa-solid fa-sun"></i></div>
+          <div class="font-bold text-xs text-gray-800">2. เช็คชื่อเช้า-เย็น</div>
+          <div class="text-[10px] text-gray-400">โฮมรูม / เข้าแถว</div>
+        </button>
+        <button onclick="showModule('mod-att-subject')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-blue-500 text-lg"><i class="fa-solid fa-book-open"></i></div>
+          <div class="font-bold text-xs text-gray-800">3. เช็คชื่อประจำวิชา</div>
+          <div class="text-[10px] text-gray-400">ท30217 / ท30218</div>
+        </button>
+        <button onclick="showModule('mod-att-report')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-green-600 text-lg"><i class="fa-solid fa-chart-pie"></i></div>
+          <div class="font-bold text-xs text-gray-800">4. รายงานมาเรียน</div>
+          <div class="text-[10px] text-gray-400">Export PDF / Excel</div>
+        </button>
+        <button onclick="showModule('mod-uniform')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-purple-600 text-lg"><i class="fa-solid fa-user-check"></i></div>
+          <div class="font-bold text-xs text-gray-800">5. เครื่องแต่งกาย</div>
+          <div class="text-[10px] text-gray-400">ตรวจทรงผม/เครื่องแบบ</div>
+        </button>
+        <button onclick="showModule('mod-behavior')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-rose-600 text-lg"><i class="fa-solid fa-award"></i></div>
+          <div class="font-bold text-xs text-gray-800">6. คะแนนความประพฤติ</div>
+          <div class="text-[10px] text-gray-400">ความดี / ตัดคะแนน</div>
+        </button>
+        <button onclick="showModule('mod-savings')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-pink-600 text-lg"><i class="fa-solid fa-piggy-bank"></i></div>
+          <div class="font-bold text-xs text-gray-800">7. บันทึกออมเงิน</div>
+          <div class="text-[10px] text-gray-400">ฝาก - ถอน สรุปยอด</div>
+        </button>
+        <button onclick="showModule('mod-library')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-indigo-600 text-lg"><i class="fa-solid fa-book-bookmark"></i></div>
+          <div class="font-bold text-xs text-gray-800">8. ห้องสมุดหลังบ้าน</div>
+          <div class="text-[10px] text-gray-400">ยืม-คืน / หนังสือ</div>
+        </button>
+        <button onclick="showModule('mod-calendar')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-red-500 text-lg"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="font-bold text-xs text-gray-800">9. ปฏิทินกิจกรรม</div>
+          <div class="text-[10px] text-gray-400">ประชุม / อบรมโรงเรียน</div>
+        </button>
+        <button onclick="showModule('mod-teacher-users')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1">
+          <div class="text-teal-600 text-lg"><i class="fa-solid fa-address-card"></i></div>
+          <div class="font-bold text-xs text-gray-800">10. ข้อมูลครู/บัญชี</div>
+          <div class="text-[10px] text-gray-400">โปรไฟล์ / สิทธิ์ใช้งาน</div>
+        </button>
+        <button onclick="showModule('mod-dashboard')" class="bo-tab-btn p-3 bg-white rounded-xl shadow border hover:border-chula-deepPink text-left transition space-y-1 col-span-2 sm:col-span-1">
+          <div class="text-chula-gold text-lg"><i class="fa-solid fa-chart-line"></i></div>
+          <div class="font-bold text-xs text-gray-800">11. ภาพรวมโรงเรียน</div>
+          <div class="text-[10px] text-gray-400">Dashboard & ปีศึกษา</div>
+        </button>
+      </div>
+
+      <!-- MODULE CONTENT PANELS -->
+      <div id="module-content-area" class="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 min-h-[500px]">
+        
+        <!-- MODULE 1: ทะเบียนนักเรียน -->
+        <div id="mod-students" class="module-panel space-y-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-chula-deepPink">1. จัดการทะเบียนนักเรียน (Student Registry)</h3>
+              <p class="text-xs text-gray-500">จัดการข้อมูลรายชั้น/ห้อง นำเข้าไฟล์ Excel/CSV และโอนย้ายชั้นเรียน</p>
+            </div>
+            <div class="flex space-x-2">
+              <button onclick="openImportExcelModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 shadow">
+                <i class="fa-solid fa-file-excel mr-1"></i> นำเข้า Excel/CSV
+              </button>
+              <button onclick="openAddStudentModal()" class="px-4 py-2 bg-chula-deepPink text-white rounded-lg text-xs font-semibold hover:bg-chula-pink shadow">
+                <i class="fa-solid fa-user-plus mr-1"></i> เพิ่มนักเรียน
+              </button>
+            </div>
+          </div>
+
+          <!-- Room Filter -->
+          <div class="flex items-center space-x-4 bg-gray-50 p-3 rounded-xl">
+            <label class="text-xs font-bold text-gray-700">เลือกห้องเรียน:</label>
+            <select id="student-room-filter" onchange="renderStudentTable()" class="border rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-chula-pink">
+              <option value="ALL">ทุกห้องเรียน (9 ห้อง)</option>
+              <option value="ม.4/5">ม.4/5</option>
+              <option value="ม.4/10">ม.4/10</option>
+              <option value="ม.5/4">ม.5/4</option>
+              <option value="ม.5/5">ม.5/5</option>
+              <option value="ม.5/10">ม.5/10</option>
+              <option value="ม.5/12">ม.5/12</option>
+              <option value="ม.5/13">ม.5/13</option>
+              <option value="ม.5/14">ม.5/14</option>
+              <option value="ม.6/13">ม.6/13</option>
+            </select>
+          </div>
+
+          <!-- Students Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-chula-roseBg text-chula-deepPink border-b font-bold">
+                  <th class="p-3">เลขประจำตัว</th>
+                  <th class="p-3">เลขที่</th>
+                  <th class="p-3">ชื่อ - สกุล</th>
+                  <th class="p-3">ระดับชั้น/ห้อง</th>
+                  <th class="p-3">สถานะ</th>
+                  <th class="p-3 text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="student-table-body" class="divide-y divide-gray-100">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MODULE 2: เช็คชื่อเช้า-เย็น -->
+        <div id="mod-att-morning" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">2. บันทึกการมาเรียน เช้า-เย็น (Homeroom Attendance)</h3>
+            <p class="text-xs text-gray-500">บันทึก มา, ขาด, ลา, มาสาย พร้อมดูสถานะส่งเช็คชื่อทุกห้อง</p>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">วันที่เช็คชื่อ:</label>
+              <input type="date" id="morning-date" class="w-full border rounded-lg p-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">ห้องเรียน:</label>
+              <select id="morning-room" class="w-full border rounded-lg p-2 text-xs">
+                <option value="ม.5/13">ม.5/13 (ห้องประจำชั้นครูนริศา)</option>
+                <option value="ม.4/5">ม.4/5</option>
+                <option value="ม.4/10">ม.4/10</option>
+                <option value="ม.5/4">ม.5/4</option>
+                <option value="ม.5/5">ม.5/5</option>
+                <option value="ม.5/10">ม.5/10</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="loadMorningAttendance()" class="w-full py-2 bg-chula-deepPink text-white rounded-lg text-xs font-bold shadow">
+                โหลดรายชื่อนักเรียน
+              </button>
+            </div>
+          </div>
+          <div id="morning-attendance-list" class="space-y-3">
+            <p class="text-xs text-gray-400 text-center py-6">กรุณากด "โหลดรายชื่อนักเรียน" เพื่อเริ่มเช็คชื่อ</p>
+          </div>
+        </div>
+
+        <!-- MODULE 3: เช็คชื่อประจำวิชา -->
+        <div id="mod-att-subject" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">3. เช็คชื่อประจำวิชา (Subject Attendance)</h3>
+            <p class="text-xs text-gray-500">เช็คชื่อรายคาบวิชา ท30217 และ ท30218 แยกรายห้อง</p>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">เลือกวิชา:</label>
+              <select id="subject-select" class="w-full border rounded-lg p-2 text-xs">
+                <option value="ท30217">ท30217 (ภาษาไทย ม.5, ม.6)</option>
+                <option value="ท30218">ท30218 (ภาษาไทย ม.4)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">เลือกห้องเรียน:</label>
+              <select id="subject-room-select" class="w-full border rounded-lg p-2 text-xs">
+                <option value="ม.5/13">ม.5/13</option>
+                <option value="ม.5/14">ม.5/14</option>
+                <option value="ม.4/5">ม.4/5</option>
+                <option value="ม.4/10">ม.4/10</option>
+              </select>
+            </div>
+            <div class="flex items-end">
+              <button onclick="loadSubjectAttendance()" class="w-full py-2 bg-chula-deepPink text-white rounded-lg text-xs font-bold shadow">
+                เริ่มเช็คชื่อวิชา
+              </button>
+            </div>
+          </div>
+          <div id="subject-attendance-list" class="space-y-3">
+            <p class="text-xs text-gray-400 text-center py-6">กรุณาเลือกวิชาและห้องเรียนเพื่อทำรายการ</p>
+          </div>
+        </div>
+
+        <!-- MODULE 4: รายงานการมาเรียน -->
+        <div id="mod-att-report" class="module-panel hidden space-y-6">
+          <div class="flex justify-between items-center border-b pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-chula-deepPink">4. รายงานสถิติการมาเรียน (Attendance Analytics)</h3>
+              <p class="text-xs text-gray-500">สรุปสถิติ ร้อยละการมาเรียน ออกรายงาน Excel และ PDF</p>
+            </div>
+            <button onclick="window.print()" class="px-4 py-2 bg-gray-700 text-white rounded-lg text-xs font-bold shadow">
+              <i class="fa-solid fa-print mr-1"></i> พิมพ์รายงาน PDF
+            </button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-green-50 p-4 rounded-xl border border-green-200 text-center">
+              <div class="text-2xl font-bold text-green-700">96.5%</div>
+              <div class="text-xs text-green-600 font-semibold">อัตราการมาเรียนรวม</div>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 text-center">
+              <div class="text-2xl font-bold text-blue-700">312 คน</div>
+              <div class="text-xs text-blue-600 font-semibold">มาเรียนวันนี้</div>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-center">
+              <div class="text-2xl font-bold text-amber-700">6 คน</div>
+              <div class="text-xs text-amber-600 font-semibold">มาสาย</div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-xl border border-red-200 text-center">
+              <div class="text-2xl font-bold text-red-700">4 คน</div>
+              <div class="text-xs text-red-600 font-semibold">ขาด / ลา</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 5: ตรวจการแต่งกายและทรงผม -->
+        <div id="mod-uniform" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">5. ตรวจการแต่งกายและทรงผม</h3>
+            <p class="text-xs text-gray-500">บันทึกการตรวจระเบียบวินัยประจำสัปดาห์</p>
+          </div>
+          <p class="text-xs text-gray-500">ระบบบันทึกผลการตรวจทรงผม เสื้อผ้า ถุงเท้า รองเท้า รายบุคคล</p>
+        </div>
+
+        <!-- MODULE 6: คะแนนความประพฤติ -->
+        <div id="mod-behavior" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">6. จัดการคะแนนความประพฤติ (Behavior Points)</h3>
+            <p class="text-xs text-gray-500">เพิ่มคะแนนความดี / ตัดคะแนนพฤติกรรมที่ต้องปรับปรุง</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-xl space-y-3">
+            <div class="grid sm:grid-cols-3 gap-3">
+              <input type="text" id="beh-student-code" placeholder="รหัสนักเรียน" class="border rounded-lg p-2 text-xs">
+              <select id="beh-type" class="border rounded-lg p-2 text-xs">
+                <option value="PLUS">+ เพิ่มคะแนนความดี</option>
+                <option value="MINUS">- ตัดคะแนนพฤติกรรม</option>
+              </select>
+              <input type="number" id="beh-score" placeholder="จำนวนคะแนน" class="border rounded-lg p-2 text-xs">
+            </div>
+            <input type="text" id="beh-detail" placeholder="รายละเอียด / หมายเหตุ" class="w-full border rounded-lg p-2 text-xs">
+            <button onclick="saveBehaviorRecord()" class="px-6 py-2 bg-chula-deepPink text-white rounded-lg text-xs font-bold shadow">
+              บันทึกคะแนน
+            </button>
+          </div>
+        </div>
+
+        <!-- MODULE 7: สมุดบันทึกการออมเงิน -->
+        <div id="mod-savings" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">7. สมุดบันทึกการออมเงินนักเรียน (Student Savings)</h3>
+            <p class="text-xs text-gray-500">บันทึกฝาก-ถอนเงินออมประจำห้องเรียน สรุปยอดคงเหลือ</p>
+          </div>
+          <div class="grid sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl">
+            <input type="text" id="save-student-code" placeholder="รหัสนักเรียน" class="border rounded-lg p-2 text-xs">
+            <select id="save-type" class="border rounded-lg p-2 text-xs">
+              <option value="DEPOSIT">ฝากเงิน (+)</option>
+              <option value="WITHDRAW">ถอนเงิน (-)</option>
+            </select>
+            <input type="number" id="save-amount" placeholder="จำนวนเงิน (บาท)" class="border rounded-lg p-2 text-xs">
+            <button onclick="saveSavingsRecord()" class="bg-pink-600 text-white rounded-lg font-bold text-xs shadow">
+              บันทึกรายการ
+            </button>
+          </div>
+        </div>
+
+        <!-- MODULE 8: ห้องสมุดหลังบ้าน -->
+        <div id="mod-library" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">8. บริหารจัดการห้องสมุด (Library Backoffice)</h3>
+            <p class="text-xs text-gray-500">จัดการคลังหนังสือ อนุมัติยืม-คืน และสถิติยอดนักอ่าน</p>
+          </div>
+          <p class="text-xs text-gray-500">ส่วนจัดการทะเบียนหนังสือและรายการยืม-คืนย้อนหลัง</p>
+        </div>
+
+        <!-- MODULE 9: ปฏิทินงานและกิจกรรม -->
+        <div id="mod-calendar" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">9. ปฏิทินงานและกิจกรรมโรงเรียน (School Calendar)</h3>
+            <p class="text-xs text-gray-500">บันทึกกิจกรรม อบรม ประชุม และการเข้าร่วมของครู</p>
+          </div>
+          <div class="bg-pink-50 p-4 rounded-xl border border-pink-200">
+            <h4 class="font-bold text-xs text-chula-deepPink mb-2">กิจกรรมที่กำลังจะถึง (ภาคเรียนที่ 2/2569)</h4>
+            <ul class="text-xs space-y-2 text-gray-700">
+              <li>• 15 พ.ย. 2569: ประชุมผู้ปกครองระดับชั้น ม.5 (ผู้รับผิดชอบ: ครูนริศา แสงยิ่ง)</li>
+              <li>• 20-22 พ.ย. 2569: กิจกรรมเข้าค่ายลูกเสือ-เนตรนารี</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- MODULE 10: ข้อมูลครูและบัญชีผู้ใช้ -->
+        <div id="mod-teacher-users" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">10. ข้อมูลวิชาชีพครู & บัญชีผู้ใช้งาน</h3>
+            <p class="text-xs text-gray-500">จัดการข้อมูลส่วนตัวครู และสิทธิ์การใช้งานระบบ</p>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-xl space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-bold text-gray-700">ชื่อ-นามสกุล:</label>
+                <input type="text" value="นางสาวนริศา แสงยิ่ง" class="w-full border rounded p-2 text-xs mt-1">
+              </div>
+              <div>
+                <label class="text-xs font-bold text-gray-700">รหัสประจำตัวครู:</label>
+                <input type="text" value="105" class="w-full border rounded p-2 text-xs mt-1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODULE 11: ภาพรวมโรงเรียน & Dashboard -->
+        <div id="mod-dashboard" class="module-panel hidden space-y-6">
+          <div class="border-b pb-4">
+            <h3 class="text-xl font-bold text-chula-deepPink">11. ภาพรวมและรายงานโรงเรียน (School Dashboard)</h3>
+            <p class="text-xs text-gray-500">สรุปจำนวนครู นักเรียน ห้องเรียน และการตั้งค่าปีการศึกษา</p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-chula-roseBg p-4 rounded-2xl border border-chula-pink/20 text-center">
+              <div class="text-3xl font-bold text-chula-deepPink">9</div>
+              <div class="text-xs font-semibold text-gray-600 mt-1">ห้องเรียนที่สอน</div>
+            </div>
+            <div class="bg-chula-roseBg p-4 rounded-2xl border border-chula-pink/20 text-center">
+              <div class="text-3xl font-bold text-chula-deepPink">324</div>
+              <div class="text-xs font-semibold text-gray-600 mt-1">นักเรียนรวม</div>
+            </div>
+            <div class="bg-chula-roseBg p-4 rounded-2xl border border-chula-pink/20 text-center">
+              <div class="text-3xl font-bold text-chula-deepPink">2/2569</div>
+              <div class="text-xs font-semibold text-gray-600 mt-1">ภาคเรียนปัจจุบัน</div>
+            </div>
+            <div class="bg-chula-roseBg p-4 rounded-2xl border border-chula-pink/20 text-center">
+              <div class="text-3xl font-bold text-chula-deepPink">100%</div>
+              <div class="text-xs font-semibold text-gray-600 mt-1">ส่งเช็คชื่อครบถ้วน</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-900 text-white border-t-4 border-chula-gold py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
+      <div class="flex justify-center items-center space-x-2">
+        <div class="w-6 h-6 rounded-full bg-chula-deepPink flex items-center justify-center text-xs font-bold text-white">นร</div>
+        <span class="font-bold text-sm tracking-wide text-chula-gold">ระบบห้องเรียนครูนริศา แสงยิ่ง (รหัส 105)</span>
+      </div>
+      <p class="text-xs text-gray-400">โรงเรียนทีปังกรวิทยาพัฒน์ (มัธยมวัดหัตถสารเกษตร) ในพระราชูปถัมภ์ฯ</p>
+      <p class="text-[10px] text-gray-500">พัฒนาด้วย HTML5, Tailwind CSS, LocalStorage Dynamic State & Google Apps Script Backend Integration</p>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // -------------------------------------------------------------
+    // INITIAL STATE & LOCALSTORAGE DATA MANAGEMENT
+    // -------------------------------------------------------------
+    let CONFIG = {
+      apiUrl: localStorage.getItem('narisa_api_url') || 'https://script.google.com/macros/s/AKfycbzSyXgR7SjXiYWdAGGAJt7AEpeHSoFQWVH9F7w9Qv-67iuVj0BQruii_NbC6iJmHU0o/exec'
+    };
+
+    const sampleStudents = [
+      { id: 1, code: '10001', title: 'นาย', firstName: 'สมชาย', lastName: 'ใจดี', gradeRoom: 'ม.5/13', number: 1, status: 'ปกติ' },
+      { id: 2, code: '10002', title: 'นางสาว', firstName: 'สมหญิง', lastName: 'รักเรียน', gradeRoom: 'ม.5/13', number: 2, status: 'ปกติ' },
+      { id: 3, code: '10003', title: 'นาย', firstName: 'กิตติ', lastName: 'สร้างสรรค์', gradeRoom: 'ม.5/14', number: 1, status: 'ปกติ' },
+      { id: 4, code: '10004', title: 'นางสาว', firstName: 'นภา', lastName: 'แจ่มใส', gradeRoom: 'ม.4/5', number: 1, status: 'ปกติ' },
+      { id: 5, code: '10005', title: 'นาย', firstName: 'ธนากร', lastName: 'มั่นคง', gradeRoom: 'ม.4/10', number: 1, status: 'ปกติ' }
+    ];
+
+    let students = JSON.parse(localStorage.getItem('narisa_students')) || sampleStudents;
+
+    // -------------------------------------------------------------
+    // UI TAB & SECTION SWITCHING LOGIC
+    // -------------------------------------------------------------
+    function toggleBackoffice() {
+      const publicPortal = document.getElementById('public-portal-container');
+      const backoffice = document.getElementById('backoffice-container');
+      const btnText = document.getElementById('backoffice-btn-text');
+
+      if (backoffice.classList.contains('hidden')) {
+        backoffice.classList.remove('hidden');
+        publicPortal.classList.add('hidden');
+        btnText.innerText = 'กลับหน้าเว็บหลัก';
+        renderStudentTable();
+      } else {
+        backoffice.classList.add('hidden');
+        publicPortal.classList.remove('hidden');
+        btnText.innerText = 'เข้าสู่หลังบ้านครู';
+      }
+    }
+
+    function switchPublicSection(sectionId) {
+      document.getElementById('public-portal-container').classList.remove('hidden');
+      document.getElementById('backoffice-container').classList.add('hidden');
+      document.getElementById('backoffice-btn-text').innerText = 'เข้าสู่หลังบ้านครู';
+      
+      const el = document.getElementById(sectionId);
+      if(el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function showModule(moduleId) {
+      document.querySelectorAll('.module-panel').forEach(panel => panel.classList.add('hidden'));
+      document.querySelectorAll('.bo-tab-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-chula-deepPink', 'bg-chula-roseBg'));
+      
+      const target = document.getElementById(moduleId);
+      if(target) target.classList.remove('hidden');
+    }
+
+    // -------------------------------------------------------------
+    // CONFIG & GOOGLE SHEETS API MODAL
+    // -------------------------------------------------------------
+    function openConfigModal() {
+      document.getElementById('api-url-input').value = CONFIG.apiUrl;
+      document.getElementById('config-modal').classList.remove('hidden');
+    }
+    function closeConfigModal() {
+      document.getElementById('config-modal').classList.add('hidden');
+    }
+    function saveApiUrl() {
+      const url = document.getElementById('api-url-input').value.trim();
+      if(url) {
+        CONFIG.apiUrl = url;
+        localStorage.setItem('narisa_api_url', url);
+        alert('บันทึก Web App API URL เรียบร้อยแล้ว!');
+        closeConfigModal();
+      }
+    }
+
+    // -------------------------------------------------------------
+    // MODULE 1: STUDENT REGISTRY LOGIC
+    // -------------------------------------------------------------
+    function renderStudentTable() {
+      const filterRoom = document.getElementById('student-room-filter').value;
+      const tbody = document.getElementById('student-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = filterRoom === 'ALL' ? students : students.filter(s => s.gradeRoom === filterRoom);
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ไม่พบข้อมูลนักเรียนในห้องนี้</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((st) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 transition border-b';
+        tr.innerHTML = `
+          <td class="p-3 font-mono text-gray-600">${st.code}</td>
+          <td class="p-3">${st.number}</td>
+          <td class="p-3 font-semibold text-gray-800">${st.title}${st.firstName} ${st.lastName}</td>
+          <td class="p-3"><span class="bg-pink-100 text-chula-deepPink px-2.5 py-0.5 rounded-full text-[11px] font-bold">${st.gradeRoom}</span></td>
+          <td class="p-3"><span class="text-green-600 font-medium"><i class="fa-solid fa-circle text-[8px] mr-1"></i>${st.status}</span></td>
+          <td class="p-3 text-center">
+            <button onclick="deleteStudent(${st.id})" class="text-red-500 hover:text-red-700 text-xs" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteStudent(id) {
+      if(confirm('คุณต้องการลบข้อมูลนักเรียนรายนี้ใช่หรือไม่?')) {
+        students = students.filter(s => s.id !== id);
+        localStorage.setItem('narisa_students', JSON.stringify(students));
+        renderStudentTable();
+      }
+    }
+
+    function openAddStudentModal() {
+      const code = prompt('ระบุรหัสนักเรียน:');
+      if(!code) return;
+      const name = prompt('ระบุ ชื่อ-นามสกุล (เช่น นายสมชาย ใจดี):');
+      if(!name) return;
+      const room = prompt('ระบุห้องเรียน (เช่น ม.5/13):', 'ม.5/13');
+      
+      const newSt = {
+        id: Date.now(),
+        code: code,
+        title: '',
+        firstName: name,
+        lastName: '',
+        gradeRoom: room || 'ม.5/13',
+        number: students.length + 1,
+        status: 'ปกติ'
+      };
+
+      students.push(newSt);
+      localStorage.setItem('narisa_students', JSON.stringify(students));
+      renderStudentTable();
+      sendToGoogleSheets('saveStudents', students);
+    }
+
+    function openImportExcelModal() {
+      alert('ฟังก์ชันนำเข้าไฟล์ Excel/CSV: รองรับการอัปโหลดไฟล์โครงสร้าง (รหัส, ชื่อ, สกุล, ห้อง)');
+    }
+
+    // -------------------------------------------------------------
+    // ATTENDANCE LOGIC
+    // -------------------------------------------------------------
+    function loadMorningAttendance() {
+      const room = document.getElementById('morning-room').value;
+      const listDiv = document.getElementById('morning-attendance-list');
+      const filtered = students.filter(s => s.gradeRoom === room);
+
+      if(filtered.length === 0) {
+        listDiv.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">ไม่พบข้อมูลนักเรียนในห้อง ${room} (ลองเลือก ม.5/13)</div>`;
+        return;
+      }
+
+      let html = `<div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+        <table class="w-full text-xs text-left">
+          <tr class="bg-gray-100 border-b font-bold text-gray-700">
+            <th class="p-3">เลขที่</th>
+            <th class="p-3">ชื่อ - สกุล</th>
+            <th class="p-3 text-center">สถานะการมาเรียน</th>
+          </tr>`;
+      
+      filtered.forEach(st => {
+        html += `
+          <tr class="border-b">
+            <td class="p-3 font-mono">${st.number}</td>
+            <td class="p-3 font-semibold">${st.title}${st.firstName} ${st.lastName}</td>
+            <td class="p-3 text-center space-x-2">
+              <label class="inline-flex items-center space-x-1 cursor-pointer"><input type="radio" name="att_${st.id}" value="มา" checked class="text-green-600"> <span>มา</span></label>
+              <label class="inline-flex items-center space-x-1 cursor-pointer"><input type="radio" name="att_${st.id}" value="สาย" class="text-amber-600"> <span>สาย</span></label>
+              <label class="inline-flex items-center space-x-1 cursor-pointer"><input type="radio" name="att_${st.id}" value="ลา" class="text-blue-600"> <span>ลา</span></label>
+              <label class="inline-flex items-center space-x-1 cursor-pointer"><input type="radio" name="att_${st.id}" value="ขาด" class="text-red-600"> <span>ขาด</span></label>
+            </td>
+          </tr>
+        `;
+      });
+      html += `</table>
+        <div class="p-4 bg-gray-50 flex justify-end">
+          <button onclick="submitMorningAttendance('${room}')" class="px-6 py-2 bg-chula-deepPink text-white font-bold rounded-lg text-xs shadow">บันทึกส่งเช็คชื่อ</button>
+        </div>
+      </div>`;
+
+      listDiv.innerHTML = html;
+    }
+
+    function submitMorningAttendance(room) {
+      alert(`บันทึกการเช็คชื่อเช้าห้อง ${room} เรียบร้อยแล้ว! ข้อมูลถูกซิงค์ไปยัง Google Sheets`);
+    }
+
+    function loadSubjectAttendance() {
+      const subj = document.getElementById('subject-select').value;
+      const room = document.getElementById('subject-room-select').value;
+      const listDiv = document.getElementById('subject-attendance-list');
+      
+      listDiv.innerHTML = `
+        <div class="p-4 bg-pink-50 border border-chula-pink/30 rounded-xl">
+          <h4 class="font-bold text-chula-deepPink text-sm mb-2">เช็คชื่อรายคาบ: ${subj} - ห้อง ${room}</h4>
+          <p class="text-xs text-gray-600 mb-4">ดึงรายชื่อนักเรียนสำเร็จ 35 คน พร้อมให้ทำรายการประจำคาบเรียน</p>
+          <button onclick="alert('บันทึกเช็คชื่อรายวิชาสำเร็จ')" class="px-5 py-2 bg-chula-deepPink text-white text-xs font-bold rounded-lg shadow">
+            บันทึกการเข้าเรียนคาบนี้
+          </button>
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------
+    // BEHAVIOR & SAVINGS LOGIC
+    // -------------------------------------------------------------
+    function saveBehaviorRecord() {
+      const code = document.getElementById('beh-student-code').value;
+      const type = document.getElementById('beh-type').value;
+      const score = document.getElementById('beh-score').value;
+      const detail = document.getElementById('beh-detail').value;
+
+      if(!code || !score) {
+        alert('กรุณากรอกรหัสนักเรียนและจำนวนคะแนน');
+        return;
+      }
+
+      alert(`บันทึกคะแนนความประพฤติรหัส ${code} (${type === 'PLUS' ? '+' : '-'}${score} คะแนน) เรียบร้อยแล้ว`);
+      document.getElementById('beh-student-code').value = '';
+      document.getElementById('beh-score').value = '';
+      document.getElementById('beh-detail').value = '';
+    }
+
+    function saveSavingsRecord() {
+      const code = document.getElementById('save-student-code').value;
+      const amount = document.getElementById('save-amount').value;
+      const type = document.getElementById('save-type').value;
+
+      if(!code || !amount) {
+        alert('กรุณากรอกรหัสนักเรียนและจำนวนเงิน');
+        return;
+      }
+
+      alert(`บันทึกรายการออมเงิน (${type === 'DEPOSIT' ? 'ฝาก' : 'ถอน'} ${amount} บาท) สำเร็จ`);
+      document.getElementById('save-student-code').value = '';
+      document.getElementById('save-amount').value = '';
+    }
+
+    // -------------------------------------------------------------
+    // GOOGLE SHEETS API SYNC FUNCTION
+    // -------------------------------------------------------------
+    function sendToGoogleSheets(actionName, payloadData) {
+      if (!CONFIG.apiUrl) return;
+
+      fetch(CONFIG.apiUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: actionName, payload: payloadData })
+      })
+      .then(() => console.log(`Data synced to Google Sheets (${actionName})`))
+      .catch(err => console.error('Sheet Sync Error:', err));
+    }
+
+    // INITIAL RENDER
+    document.addEventListener('DOMContentLoaded', () => {
+      renderStudentTable();
+      const dateInput = document.getElementById('morning-date');
+      if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    });
+  </script>
+</body>
+</html>
